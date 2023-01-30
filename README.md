@@ -17,3 +17,5 @@ pid ie = Process.spawn(’”C:\Program Files\Internet Explorer\iexplore.exe”�
 pid url = Process.spawn(’LastUrlRecorder.exe’)
 ```
 生徒側の GUI は卒論の本文を参照してください。
+
+https://indexhtml.azurewebsites.net/thesis.pdf
