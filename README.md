@@ -20,4 +20,6 @@ pid url = Process.spawn(’LastUrlRecorder.exe’)
 ```
 生徒側の GUI は卒論の本文を参照してください。
 
-https://indexhtml.azurewebsites.net/thesis.pdf
+[https://shirasakito.github.io](https://shirasakito.github.io)
+
+
