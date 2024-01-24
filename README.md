@@ -1,5 +1,5 @@
 # YamakawaNihonshiB-Words.rb
-thesis 2012
+The my thesis (2012)
 
 ウェブフィルタの傾向評価用スクリプト。
 
