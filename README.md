@@ -1,6 +1,4 @@
 # YamakawaNihonshiB-Words.rb
-The my thesis (2012)
-
 ウェブフィルタの傾向評価用スクリプト。
 
 ## 注意
