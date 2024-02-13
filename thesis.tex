@@ -1,0 +1,781 @@
+\documentclass[a4paper,11pt,oneside,openany]{jsbook}
+%\documentclass[a4paper,11pt]{jsbook}
+\usepackage[dvipdfmx]{graphicx}
+\usepackage{okumacro}
+\usepackage{txfonts}
+\usepackage{url}
+\usepackage{here}
+\usepackage{plext}
+\usepackage{makeidx}
+\usepackage{listings,jlisting}
+\DeclareFontEncoding{LGR}{}{}
+\DeclareFontSubstitution{LGR}{cmr}{m}{n}
+%
+\lstset{%
+ language={[Visual]Basic},%
+ %backgroundcolor={\color[gray]{.85}},%
+ basicstyle={\small},%
+ identifierstyle={\small},%
+ commentstyle={\small\itshape},%
+ keywordstyle={\small\bfseries},%
+ ndkeywordstyle={\small},%
+ stringstyle={\small\ttfamily},
+ frame={tb},
+ breaklines=true,
+ columns=[l]{fullflexible},%
+ numbers=left,%
+ xrightmargin=0zw,%
+ xleftmargin=3zw,%
+ numberstyle={\scriptsize},%
+ stepnumber=1,
+ numbersep=1zw,%
+ lineskip=-0.5ex%
+}
+\def\lstlistingname{ソースコード}
+\def\lstlistlistingname{ソースコード目次}
+%\usepackage[greek]{babel}
+\makeindex
+\title{教育機関で利用されるウェブフィルタリング\\ソフトウェアの問題点と改良の研究\\\vspace{1zw}\Large{卒業論文 II}}
+\author{\small{07L503013}\\白崎智哉 \thanks{社会学科 \texttt{shrskt@gmail.com} / 40 字 * 38 行 * 31 ページ，400 字詰め原稿用紙 118 ページ相当。}}
+\date{\today}
+\begin{document}
+\maketitle
+\frontmatter
+\tableofcontents
+%\chapter*{はじめに}
+%\addcontentsline{toc}{chapter}{はじめに}
+%ダミー
+\mainmatter
+\chapter{序論}
+\section{なぜこのテーマを設定したか}
+重要なメールを，高度な統計処理を応用した迷惑メールフィルタに削除されてしまうように，初等中等教育の現場で「有害情報\index{ゆうかい@有害情報}」を遮断\index{しやたん@遮断}するために利用されるウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}も，誤った判断を下すことがある。この問題は，ウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}を複数用意して，生徒自身に比較\index{ひかく@比較}させることで，トータルでウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}の信頼性を向上させることで部分的に解決できるものと考えられる。
+
+また，ウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}が政治的に微妙な歴史用語を遮断\index{しやたん@遮断}している，あるいは遮断\index{しやたん@遮断}していないとすれば，歴史教科書\index{れきしきようかしよ@歴史教科書}とウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}は，構造的に同じ問題を抱えていることになる。ウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}と同じ構造を持つ歴史教科書\index{れきしきようかしよ@歴史教科書}においても，複数用意して生徒自身に比較\index{ひかく@比較}させることで，「歴史教科書問題\index{れきしきようかしよもんたい@歴史教科書問題}」の一部を回避できるのではないかと考えた。
+
+つまり，この論文の目的は，次の 2 点である。
+\begin{itemize}
+    \item ウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}を複数用意すれば，それぞれのウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}の信頼性を比較\index{ひかく@比較}して検討できることを証明すること。
+    \item ウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}と歴史教科書\index{れきしきようかしよ@歴史教科書}を比較\index{ひかく@比較}して，歴史教科書問題\index{れきしきようかしよもんたい@歴史教科書問題}に，歴史教科書\index{れきしきようかしよ@歴史教科書}を複数用意して比較\index{ひかく@比較}する方法論を持ち込めないか検討すること。あるいは，逆に，歴史教科書\index{れきしきようかしよ@歴史教科書}の比較\index{ひかく@比較}研究をウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}に持ち込めないか検討すること。
+\end{itemize}
+\section{用語の定義}
+\subsection{ウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}}
+以降，初等中等学校において，生徒の使用するコンピュータの上で有害なコンテンツの遮断を行うクライアントアプリケーション型，生徒の使用するコンピュータのトラフィックを監視してサーバ上で遮断を行うアプライアンス型，生徒の使用するコンピュータのトラフィックをプロバイダ側で監視して遮断を行うプロバイダ型のコンテンツフィルタ（表 \ref{table:fil}）をまとめてウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}と呼称する。
+
+また，ウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}は，子供と有害情報\index{ゆうかい@有害情報}の接触を防ぐ装置（図 \ref{fig:if}）としての意味に限定する。本論では，組織の内部統制\footnote{いわゆる日本版 SOX 法に準拠した情報漏洩の防止など。}の手段としての側面およびコンピュータシステムを保護する装置としての側面は取り扱わない。
+\begin{table}
+\caption{ウェブフィルタの種類}
+\label{table:fil}
+\begin{tabular}{lrl}
+\hline \hline
+{\bf 種別} & {\bf 学校での採用率} &  \\ \hline
+クライアントアプリケーション型 & 併せて 61.7\% & 個々の端末上で遮断\index{しやたん@遮断}するフィルタ \\ 
+アプライアンス型 &  & 校内計算機室のサーバ上で遮断\index{しやたん@遮断}するフィルタ \\ \hline
+プロバイダ型 & 26.0\% & プロバイダ側で遮断\index{しやたん@遮断}するフィルタ \\ \hline
+\end{tabular}
+\end{table}
+\subsection{歴史教科書問題\index{れきしきようかしよもんたい@歴史教科書問題}}
+教科書問題は，突出して議論される歴史教科書問題\index{れきしきようかしよもんたい@歴史教科書問題}を選択した。歴史教科書\index{れきしきようかしよ@歴史教科書}以外の教科書問題については，本論では取り扱わない。また，今回は，現行制度内で問題解決を図るため，検定\index{けんてい@検定}制度には触れない。
+\section{先行研究}
+さて，ここ数年，犯罪被害を防ぐ目的や，ICT（情報通信技術）教育，メディアリテラシー教育から見たウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}の有効性は，文部科学省，経済産業省，警察庁，通信事業者団体などによって検討されている。国民運動\index{こくみんうんとう@国民運動}（図 \ref{fig:move}）などのさまざまな議論の具体的な成果は，2009年4月1日施行の「青少年が安全に安心してインターネットを利用できる環境の整備等に関する法律\index{せいしようねん@青少年が安全に安心してインターネットを利用できる環境の整備等に関する法律}」のような法制化に見て取れる。
+
+しかしながら，ウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}の精度や欠陥，子供から見たウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}の問題点，これらの問題を解決するためのプロセスに注目する研究は現在ほとんど行われていない。
+\begin{figure}[tbp]
+ \begin{center}
+  \includegraphics[width=80mm]{movement.eps}
+ \end{center}
+ \caption{国民運動\index{こくみんうんとう@国民運動}の広報ロゴマーク \newline 出典：内閣官房 IT 担当室「内閣官房インターネット\index{いんたあねっと@インターネット}上の違法・有害情報\index{ゆうかい@有害情報}対策」}
+ \label{fig:move}
+\end{figure}
+\begin{figure}[tbp]
+ \begin{center}
+  \includegraphics[width=150mm]{if.eps}
+ \end{center}
+ \caption{Web フィルタリング\index{ふいるたりんく@フィルタリング}の仕組み \newline 出典：デジタルアーツ「「i-フィルター」のテクノロジー」}
+ \label{fig:if}
+\end{figure}
+\chapter{問題設定}
+\section{ウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}には教科書と同じくある種の恣意性があるのではないか}
+文部科学省の「学校における教育の情報化の実態等に関する調査\index{ちようさ@調査}結果（平成19年度）」によれば，わが国の初等中等学校 37,050 校中，37,037 校はインターネット\index{いんたあねっと@インターネット}に接続しており，割合では 99.96\% になる。また，インターネット\index{いんたあねっと@インターネット}接続になんらかのフィルタリング\index{ふいるたりんく@フィルタリング}を施している学校の割合は，94.6\% である。
+
+このように広く普及している，すべてのウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}の有害情報\index{ゆうかい@有害情報}の遮断\index{しやたん@遮断}の判断は，理想の上では，必ず同一になる。しかし，実際には，製品ごとにそれぞ別の設計で，別のポリシーを採用している上，学校ごとに個別の禁止ワードを加える以上，どのウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}も，必ずしも同じ有害情報\index{ゆうかい@有害情報}を常に遮断\index{しやたん@遮断}するとは言えない。歴史教科書\index{れきしきようかしよ@歴史教科書}のポリシーが問題視されるのであれば，ウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}のポリシーも同じように問題視されておかしくない。さらに，禁止ワードは，その特性上，外に開示されないため，管理者は，禁止ワードを書き加えて，正規の情報を遮断\index{しやたん@遮断}するような恣意的な運用もできる。
+\section{ウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}を複数用意すればよいのではないか}
+それぞれのウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}の挙動が違う場合，挙動の違いの証拠を生徒が提出できれば，あるウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}の挙動の不審を学校側の管理者に説明できる。また，あるウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}に問題のないことも同じように説明できる。あるいは，全く問題ないと考えられるページを，すべてのウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}が遮断\index{しやたん@遮断}している場合にも証拠を用意できる。
+\section{教科書も複数用意すればよいのではないか}
+小森陽一らの『歴史教科書\index{れきしきようかしよ@歴史教科書}何が問題か――徹底検証Q\&A』では，程度を除けば，すべての歴史教科書\index{れきしきようかしよ@歴史教科書}になんらかの問題があるとしている。無謬の教科書を用意できないのであれば，すべての年代のすべての教科書を揃えて，事項を比較\index{ひかく@比較}できればよいのではないか。もしくは，現行のすべての歴史教科書\index{れきしきようかしよ@歴史教科書}の記述の差異のみを集めた，注釈書のようなものを常に発行すれば，より簡単に比較\index{ひかく@比較}できるのではないか。
+
+比較の手間，膨大な教科書の輸送や，保管の容積の問題は，電子教科書からもアプローチできる。
+
+\begin{center}
+\begin{table}
+\caption{歴史教科書\index{れきしきようかしよ@歴史教科書}とウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}の比較\index{ひかく@比較}}
+\label{table:hikaku}
+\begin{tabular}{lll}
+\hline \hline
+& {\bf 歴史教科書\index{れきしきようかしよ@歴史教科書}} & {\bf ウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}} \\ \hline
+検定\index{けんてい@検定}制度 & ● &  \\
+複数採用 & & ●（全体の 6.9\%） \\
+受験との関わり & 強い & 弱い \\ \hline
+\end{tabular}
+\end{table}
+\end{center}
+\chapter{論証の方策と妥当性}
+\section{各ウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}の遮断\index{しやたん@遮断}の傾向を見る}
+%◆違いがあってはいけないのに，フィルタごとに違いがあることを示す。遮断\index{しやたん@遮断}の傾向を調べることは，フィルタの特性を把握するのに有効。よって妥当。
+複数のウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}の遮断\index{しやたん@遮断}の傾向が全く同一であるのか，それぞれ違うのかを調べる。ウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}の特性が異なることを証明することは，精度の悪いウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}の存在を立証することに繋がる。よってこの文脈で，各ウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}の遮断\index{しやたん@遮断}の傾向を見ることは順当であると考えられる。
+\section{ウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}を複数用意する}
+ウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}を複数用意できれば，遮断\index{しやたん@遮断}の傾向を比較\index{ひかく@比較}できる。ウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}同士の比較\index{ひかく@比較}が可能になれば，ウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}の精度や不具合を利用者自身が確認できるようになると考えられる。よって，ウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}を複数用意することは妥当であると考えられる。
+\section{教科書を複数用意している学校，自治体を調べる}
+歴史教科書\index{れきしきようかしよ@歴史教科書}を複数用意している学校，自治体を調べることで，ウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}に既存の方法論を応用できる可能性がある。よって，教科書を複数用意している学校，自治体を調べることは，この文脈では順当であると考えられる。
+\chapter{論証}
+\section{各ウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}の遮断\index{しやたん@遮断}の傾向を見た}
+%◆問題ないと考えられるサイトもある程度遮断\index{しやたん@遮断}されている。
+ウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}の遮断\index{しやたん@遮断}の傾向を確認する方法はいくつか考えられる。
+\begin{itemize}
+    \item 実際に教育用コンピュータからウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}を経由してインターネット\index{いんたあねっと@インターネット}に接続している中高生に質問紙調査\index{ちようさ@調査}ないし聞き取り調査\index{ちようさ@調査}を行う
+\item 無作為な URL を用意して遮断\index{しやたん@遮断}されるかどうかをウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}ごとに記録する
+\end{itemize}
+
+1 番目の調査\index{ちようさ@調査}方法は，利用者の記憶に頼った信頼性の低いデータになると考えられる。
+
+2 番目の方法は，予め用意する URL 以外は高い客観性を持つ点と，複数のウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}を同じ条件で確認できる点で，1 番目の方法より優れる。
+%三番目は客観性が高い
+
+そこで，2 番目の方法を発展させて，ウェブ上でいくつかの歴史用語を日本語版 Google で検索して，検索結果の 1 ページ目に含まれる各検索結果がそれぞれ遮断\index{しやたん@遮断}されているかどうか調べるツールを作成した。
+\begin{figure}[tbp]
+ \begin{center}
+  \includegraphics[width=150mm]{fig_urlcollec.pdf}
+ \end{center}
+ \caption{拙作 YamakawaNihonshiB-UrlCollector.rb 動作イメージ}
+ \label{fig:YNBW}
+\end{figure}
+\begin{figure}[tbp]
+ \begin{center}
+  \includegraphics[width=120mm]{ielauncher.eps}
+ \end{center}
+ \caption{拙作 ieLauncher.rb/LastTitleRecorder 実行画面のハードコピー}
+ \label{fig:iel}
+\end{figure}
+\subsection{ウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}評価ツール}
+このツールでは，始めに，全国歴史教育研究協議会編『日本史B 用語集改訂新版』の「近代日本と世界大戦」章「第二次世界大戦\index{たいにし@第二次世界大戦}」節のすべての単語――168 単語を使用して，単語ごとに Google 検索を行い，平均 10 ページ分の検索結果の URL を収集する（図 \ref{fig:YNBW}）。次に，収集した URL に順次アクセスを試みる（図 \ref{fig:iel}）。通常，ウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}にアクセスを遮断\index{しやたん@遮断}された場合は，ウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}特有の URL に遷移するか，ブラウザのタイトルバーが書き換わるため，アクセス遮断\index{しやたん@遮断}の有無を URL ごとに自動で記録できる。
+\subsubsection{ウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}なしの場合}
+まず，それぞれのウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}に通すための URL を，ウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}なしで収集した結果，1,769 ページの URL を収集できた。そのうち 13 ページにアクセスできなかった\footnote{エラーの内訳を次に示す。アクセス拒否：2 ページ，未検出：2 ページ，サービス利用不可：3 ページ，タイムアウトエラー：7 ページ。}。また，PDF 文書は 18 文書あった。
+\subsubsection{i-フィルターの場合}
+1 番目のウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}として，Digital Arts 社製 i-フィルター 6.0 を用意した。i-フィルターの設定は，インストール時のデフォルトを使用した。テストする URL は，先に取得した 1,769 ページから，アクセスできない 13 ページと，PDF 文書の 18 文書を引いた 1,738 ページ分の URL を使用した。
+
+結果，5 ページへのアクセスを i-フィルターに遮断\index{しやたん@遮断}された。
+%\subsubsection{ウィルスバスター 2011 クラウドの場合}
+%\subsubsection{Kaspersky Internet Security 2011 の場合}
+%\subsubsection{Norton Internet Security 2011 の場合}
+\subsubsection{Windows Live ファミリーセーフティの場合}
+2 番目のウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}として，Microsoft 社製の Windows Live ファミリーセーフティ (2011) を用意した。Windows Live ファミリーセーフティの設定は，インストール時のデフォルトを使用した。テストする URL は，先に取得した 1,769 ページから，アクセスできない 13 ページと，PDF 文書の 18 文書を引いた 1,738 ページ分の URL を使用した。
+
+結果，96 ページへのアクセスを Windows Live ファミリーセーフティに遮断\index{しやたん@遮断}された。
+%\subsubsection{エフセキュア インターネット\index{いんたあねっと@インターネット} セキュリティ 2011 の場合}
+\section{ウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}を複数用意した}
+次に，ウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}同士の違いを比較\index{ひかく@比較}するために，ウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}を複数用意したい。ウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}を複数用意して教育現場で運用する方法はいくつか考えられる。
+
+\begin{itemize}
+    \item 1 台だけ別のフィルタをインストールしたコンピュータを用意する方法
+\item フィルタの先にフィルタを置いて，フィルタを重ねる方法
+\item コンピュータ側に複数のフィルタに問い合わせるプログラムを用意する方法
+\end{itemize}
+
+1 番目の方法は，一番安価である。デメリットとしては，利用者に物理的な移動を強いる点，および管理者に不当な遮断\index{しやたん@遮断}を訴える際の証拠提出が困難である点を挙げられる。
+
+2 番目の方法は，一番フェイルセーフと言える。デメリットとしては，手前に目の細かいフィルタを置くとどの段階のウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}に遮断\index{しやたん@遮断}されたのかわかりにくい点，さらに一つ目より，不当な遮断\index{しやたん@遮断}を訴えにくい点を挙げられる。この方法は，実際に採用例があり，インターネット\index{いんたあねっと@インターネット}に接続している初等中等学校の 6.9\% は，この方法を採用している。
+
+3 番目の方法は，それ以外の方法と比べて，比較\index{ひかく@比較}の容易さと，遮断\index{しやたん@遮断}の不整合の申請し易さにおいて優位である。アプライアンス型のウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}を 2 台以上必要とするため，構成によってはかなり高価になるデメリットがある。クライアントアプリケーション型とアプライアンス型の構成では，二つ目の方法と同程度か，やや上回る程度のコストになる。
+
+そこで，3 番目の方法の試作として，複数のウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}を画面上で比較\index{ひかく@比較}できるツール（図 \ref{fig:altfilter}，\ref{fig:fig_fil}）を作成した。
+\begin{figure}[tbp]
+ \begin{center}
+  \includegraphics[width=150mm]{altfilter00.eps}
+ \end{center}
+ \caption{拙作 AltFilter 実行結果}
+ \label{fig:altfilter}
+\end{figure}
+\begin{figure}[tbp]
+ \begin{center}
+  \includegraphics[width=150mm]{fil_process.pdf}
+ \end{center}
+ \caption{通常のネットワーク構成の概念図}
+ \label{fig:fig_process}
+\end{figure}
+\begin{figure}[tbp]
+ \begin{center}
+  \includegraphics[width=150mm]{fig_fil.pdf}
+ \end{center}
+ \caption{AltFilter 概念図}
+ \label{fig:fig_fil}
+\end{figure}
+\subsection{ウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}比較\index{ひかく@比較}ツール}
+このプログラム起動して「取得」をクリックすると，プログラムは，起動中のウェブブラウザから現在の URL を取得して，複数のウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}に問い合わせを行う。各ウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}ごとの遮断\index{しやたん@遮断}の有無を並べて表示することで，利用者はウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}同士の不整合を簡単に比較\index{ひかく@比較}検討できる。
+
+ここで用意する比較\index{ひかく@比較}用のウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}は，プログラムの都合上すべてアプライアンス型である必要がある。また，ここで 3 種類を想定している比較\index{ひかく@比較}用のウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}は，予算の許す限り増設できる。
+
+このプログラムでは，結果を管理者にメールで送付する手段を用意して，学校－生徒間の証拠ベースの合意形成の可能性を高めた。
+\section{教科書を複数用意している学校，自治体を調べた}
+%◆大学付属の学校で，総合／教育学部図書館を利用できる初等中等学校では，生徒自身で複数の歴史教科書\index{れきしきようかしよ@歴史教科書}を比較\index{ひかく@比較}できる。
+%◆多くの公立図書館で，複数用意されていて，閲覧できる。貸し出しできないことがある。
+財団法人教科書研究センター附属教科書図書館や，国立教育政策研究所教育研究情報センター教育図書館などの特殊な図書館を除いては，検定\index{けんてい@検定}済みの教科書は，各地の大学図書館のほか，各自治体の一部の図書館で閲覧のサービスを確認できた。
+
+また，全国 880 箇所の自治体図書館や公立学校，市役所などに設置される教科書センター\index{きようかしよせんた@教科書センター}（図 \ref{fig:center}）においても検定\index{けんてい@検定}済み教科書を常時閲覧できる。
+
+検定\index{けんてい@検定}済み教科書の貸し出しサービスは，自治体の図書館では行われていないことが多い。
+\begin{figure}[tbp]
+ \begin{center}
+  \includegraphics[width=120mm]{center.eps}
+ \end{center}
+ \caption{義務教育諸学校用教科書の採択の仕組み \newline 出典：文部科学省「教科書制度の概要」より一部改変}
+ \label{fig:center}
+\end{figure}
+\subsection{教科書センター\index{きようかしよせんた@教科書センター}}
+教科書センター\index{きようかしよせんた@教科書センター}とは，1956 年以来，各都道府県が，教育者や住民向けに設置している常設の教科書展示場である。2010 年 5 月現在，全国に 880 箇所設置されている。
+
+教科書センター\index{きようかしよせんた@教科書センター}では，小学校用教科書，中学校用教科書，高等学校用教科書，特別支援学校用教科書，一般図書\footnote{学校教育法附則第 9 条により，教科書として利用可能な図書を指す。}（特別支援学校用・学級用）のほか，現行でない旧い教科書も閲覧できる。ただし，貸し出し，複製のサービスは行われていない。
+\chapter{結論}
+\section{わかったこと}
+繰り返すと，ウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}は利用者の比較\index{ひかく@比較}によって，その精度をモニタリングできる。さらに，今回作成した AltFilter では，モニタリングの先に，ウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}そのものと，その設定についての管理者との合意形成プロセスがある。
+
+また，歴史教科書\index{れきしきようかしよ@歴史教科書}の比較\index{ひかく@比較}については，全国の教科書センター\index{きようかしよせんた@教科書センター}で比較\index{ひかく@比較}できることがわかった。
+\subsection{各ウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}の遮断\index{しやたん@遮断}の傾向}
+各ウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}の遮断\index{しやたん@遮断}の傾向は，山川出版社の発行する『日本史B 用語集改訂新版』の 168 単語を元に，Google の検索結果から収集した 1,738 の URL では，i-フィルタで 5 ページの遮断\index{しやたん@遮断}，Windows Live ファミリーセーフティで，96 ページの遮断\index{しやたん@遮断}があり，ウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}ごとに遮断\index{しやたん@遮断}の傾向が異なることを実証できた。
+
+この結果から，程度や設定の差はあれ，精度のよくないウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}は存在するものと推測できる。
+\subsection{ウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}の比較\index{ひかく@比較}}
+ウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}の比較の方法については，クライアントコンピュータ用のウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}比較ツールを作成することで，利用者の手元で複数のウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}を比較\index{ひかく@比較}検討できることを実証できた。
+
+この結果から，ウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}の複数採用は，生徒側から学校側への，ウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}の不具合の証拠提出に有効であるといえる。
+\subsection{教科書を複数用意している学校，自治体}
+教科書を複数用意している自治体は，それほど多くなかった。例えば，横浜市立図書館は，教科書センター\index{きようかしよせんた@教科書センター}指定を受ける以前の，1994 年度から 2006 年度は採択教科書のみの所蔵であるため，1994 年度から 2006 年度の横浜市立図書館を利用する初等中等学校の生徒は教科書同士を比較\index{ひかく@比較}するような読み方はできない。
+
+加えて，教科書センター\index{きようかしよせんた@教科書センター}の教科書は，基本的に検定\index{けんてい@検定}済みの教科書を展示しているため，検定\index{けんてい@検定}済みを通らない教科書と検定\index{けんてい@検定}済み済み教科書の教科書を比較\index{ひかく@比較}するような読み方もできない。
+\section{残った課題}
+次の 3 点は課題として残った。
+\begin{itemize}
+    \item ウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}は受験の点数に影響するかどうか不明な点
+    \item 歴史教科書問題\index{れきしきようかしよもんたい@歴史教科書問題}の根本的な解決ではない点
+    \item 歴史教科書\index{れきしきようかしよ@歴史教科書}の比較\index{ひかく@比較}のコストが多大である点
+\end{itemize}
+\subsection{ウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}は受験の点数に影響するかどうか不明な点}
+教科書問題は，受験への影響も問題視されている。同じようにウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}も受験に影響すると仮定して，点数で問題を立証できるとしても，測定が難しい。
+\subsection{歴史教科書問題\index{れきしきようかしよもんたい@歴史教科書問題}の根本的な解決ではない点}
+歴史教科書問題\index{れきしきようかしよもんたい@歴史教科書問題}の観点からは，歴史教科書問題\index{れきしきようかしよもんたい@歴史教科書問題}の根本的な解決でなく，回避である点で，教科書の比較\index{ひかく@比較}という手法に限界があると考えられる。
+
+また，比較\index{ひかく@比較}にかかる時間的不経済を生徒に押し出している点で問題が残る。
+\subsection{歴史教科書\index{れきしきようかしよ@歴史教科書}の比較\index{ひかく@比較}のコストが多大である点}
+コスト意識の観点では，教育現場で，中高生に実際に教科書を比較\index{ひかく@比較}してもらえるかどうか疑問が残る。導入の賛否はともあれ，電子教科書であれば，現在の教科書よりはるかに，本論のウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}のように比較\index{ひかく@比較}しやすくなるものと考えられる。
+\chapter*{謝辞}
+\addcontentsline{toc}{chapter}{謝辞}
+本論は，山口毅先生にご指導を賜りました。心より御礼申し上げます。
+
+一部は初年次の導入教育から高城和義先生にご指導を賜りました。厚く御礼申し上げます。
+
+プログラムの作成に使用した Microsoft Visual Studio 2010 Professional は，マイクロソフト株式会社の学生支援プログラムである Microsoft DreamSpark プログラムを経由して入手したものです。また，基本的な Ruby 言語環境のほか，mechanize を使用しました。それぞれのソフトウェアの世界中の開発者の方々に御礼申し上げます。
+\newpage
+\begin{thebibliography}{99}
+\bibitem{ayres} Ayres, Ian, 2007, \textit{Super crunchers: why thinking-by-numbers is the new way to be smart}, New York: Bantam Books.（＝2010，山形浩生訳，『その数学が戦略を決める』文藝春秋．）
+\bibitem{fromm} Fromm, Erich, 1941, \textit{Escape from freedom}, New York: Farrar \& Rinehart, inc.（＝1951，日高六郎訳，『自由からの逃走』東京創元社．）
+\bibitem{lessig} Lessig, Lawrence, 2006, \textit{Code}, New York: Basic Books.（＝2007，山形浩生訳，『Code』翔泳社．）
+\bibitem{olsen} Olsen, Stefanie, 2006, "Kids outsmart Web filters," CNET News.com, (Retrieved August 10, 2011, \url{http://news.cnet.com/2009-1041_3-6062548.html}).（＝2006，坂和敏訳，「アクセス規制をすり抜ける子供たち――米の教育現場から」，CNET Japan ウェブサイト，（2011年8月10日取得， \url{http://japan.cnet.com/news/commentary/20102487/}）．）
+\bibitem{orwell} Orwell, George, 2003, \textit{Nineteen Eighty-Four}, London: Penguin.（＝2009，高橋和久訳，『一九八四年［新訳版］』早川書房．）
+\bibitem{Reichman} Reichman, Henry, 2001, \textit{Censorship and selection: issues and answers for schools}, Chicago: American Library Association.（＝2002，川崎佳代子・川崎良孝訳，『学校図書館の検閲と選択――アメリカにおける事例と解決方法（第3版）』京都大学図書館情報学研究会．）
+\bibitem{gakushu} Sawyer, Keith ed., 2006, \textit{The Cambridge Handbook of the Learning Sciences}, Cambridge: Cambridge University Press.（＝2009， 森敏昭・秋田喜代美監訳，『学習科学ハンドブック』培風館．）
+%\bibitem{break} Susskind, Lawrence E. and Jeffrey L. Cruikshank, 2006, \textit{Breaking Robert's Rules: The New Way to Run Your Meeting, Build Consensus, and Get Results}, Oxford: Oxford University Press.（＝2008，城山英明・松浦正浩訳，『コンセンサス・ビルディング入門――公共政策の交渉と合意形成の進め方』有斐閣．）
+\bibitem{asa2011a} 朝日新聞社，2011a，「携帯電話のフィルタリング義務　県が罰則付き条例案　来年1月の施行めざす」『朝日新聞』2011年3月3日群馬朝刊: 35，（2011年5月12日取得，聞蔵IIビジュアル）．
+\bibitem{asa2011b} ――――，2011b，「どうする？　親の出番（2）「危ないこと」を体験 多少のケガ覚悟 見守って」『朝日新聞』2011年9月11日東京朝刊: 29，（2011年9月14日取得，聞蔵IIビジュアル）．
+\bibitem{asa2011c} ――――，2011c，「非出会い系で性被害の少女増加　携帯の"制限"不徹底」『朝日新聞』2011年2月19日宮城朝刊: 31，（2011年5月12日取得，聞蔵IIビジュアル）．
+\bibitem{azu2007} 東浩紀，2007，『情報環境論集――東浩紀コレクションS』講談社．
+\bibitem{azu2003} 東浩紀・大澤真幸，2003，『自由を考える――9・11以降の現代思想』日本放送出版協会．
+\bibitem{alsi} アルプスシステムインテグレーション，2011，「福島県教育センター導入事例」，ALSI，（2011年5月16日取得，\url{http://www.alsi.co.jp/casestudy/fukushima_edu.html}）．
+\bibitem{naze} 家永三郎・暉峻淑子述，1994，『なぜ教科書裁判をたたかったのか』岩波書店．
+\bibitem{inaba} 稲葉振一郎，2008，『「公共性」論』NTT出版．
+\bibitem{oka} 岡村久道，2008，「インターネット関連法律の全体動向」日本インターネット協会編『インターネット白書2008』インプレス．
+\bibitem{kodomo} 子どもたちのインターネット利用について考える研究会，2009，「中高生のお子さんを持つ保護者のためのインターネットセーフティガイド」，子どもたちのインターネット利用について考える研究会ウェブサイト，（2011年9月14日取得，（2011年5月16日取得，\url{http://www.child-safenet.jp/material/index_02.html}）．
+\bibitem{naniga} 小森陽一・安丸良夫・坂本義和編，2001，『歴史教科書\index{れきしきようかしよ@歴史教科書}何が問題か――徹底検証Q\&A』岩波書店．
+\bibitem{rekishi} 小山常実，2001，『歴史教科書\index{れきしきようかしよ@歴史教科書}の歴史』草思社．
+\bibitem{sasaki} 佐々木俊尚，2008，「青少年ネット規制法案をめぐる論点」日本インターネット協会編『インターネット白書2008』インプレス．
+\bibitem{nanika} 社会科教科書執筆者懇談会編，1984，『教科書問題とは何か』未來社．
+\bibitem{jiyuu} 自由国民社，2010，「フィルタリング」『現代用語の基礎知識』，（2011年5月12日取得，現代用語の基礎知識）．
+\bibitem{yamakawa-words} 全国歴史教育研究協議会編，2000，『日本史 B 用語集 改訂新版』山川出版社．
+\bibitem{sugi2011a} 杉原里美，2011a，「どうする？　青春期のネット利用 1 情報を選びとる力，養う」『朝日新聞』2011年6月12日東京朝刊: 29，（2011年9月14日取得，聞蔵IIビジュアル）．
+\bibitem{sugi2011b} ――――，2011b，「どうする？　青春期のネット利用 2 判断力を見極め段階的に」『朝日新聞』2011年6月19日東京朝刊: 29，（2011年9月14日取得，聞蔵IIビジュアル）．
+\bibitem{sugi2011c} ――――，2011c，「どうする？　青春期のネット利用 3 アクセス制限，レベル様々」『朝日新聞』2011年6月26日東京朝刊: 23，（2011年9月14日取得，聞蔵IIビジュアル）．
+\bibitem{sugi2011d} ――――，2011d，「どうする？　青春期のネット利用 4 加害者になる危険も確認」『朝日新聞』2011年7月3日東京朝刊: 31，（2011年9月14日取得，聞蔵IIビジュアル）．
+\bibitem{sugimae} 杉原里美・前田育穂，2011，「どうする？　青春期のネット利用 5 日頃から親子で話題に」『朝日新聞』2011年7月10日東京朝刊: 29，（2011年9月14日取得，聞蔵IIビジュアル）．
+\bibitem{hourei} 総務省，2008，「青少年が安全に安心してインターネットを利用できる環境の整備等に関する法律\index{せいしようねん@青少年が安全に安心してインターネットを利用できる環境の整備等に関する法律}」，法令データ提供システム，（2010年12月1日取得， \url{http://law.e-gov.go.jp/announce/H20HO079.html}）．
+\bibitem{tan} 丹治吉順，2011，「ニュースがわからん！　中東のデモ，ネット遮断って何？」『朝日新聞』2011年2月25日東京朝刊: 2，（2011年5月12日取得，聞蔵IIビジュアル）．
+\bibitem{if} デジタルアーツ，2011，「「i-フィルター」のテクノロジー」，デジタルアーツ社ウェブサイト，（2011年6月10日取得，\url{http://www.daj.jp/filter/ifl_how.htm}）．
+\bibitem{if2011b} ――――，2011b，「特許技術と独自のノウハウ」，デジタルアーツ社ウェブサイト，（2011年6月10日取得， \url{http://www.daj.jp/cs/ifilter/trust/}）．
+\bibitem{naikaku} 内閣官房IT担当室，2007，「青少年を有害情報\index{ゆうかい@有害情報}環境から守るための国民運動\index{こくみんうんとう@国民運動}」，内閣官房インターネット\index{いんたあねっと@インターネット}上の違法・有害情報\index{ゆうかい@有害情報}対策ウェブサイト，（2010年12月1日取得， \url{http://www.it-anshin.go.jp/activity/}）．
+\bibitem{naikakufu2008} 内閣府・総務省・経済産業省，2008，「「青少年が安全に安心してインターネットを利用できる環境の整備等に関する法律施行令（案）」に対する意見募集の結果について」，内閣府内閣府共生社会政策担当ウェブサイト，（2011年8月10日取得， \url{http://www8.cao.go.jp/youth/iken/internet/kekka.html}）．
+\bibitem{naikakufu2009} ――――，2009，「青少年インターネット環境整備法関係法令条文解説」，内閣府内閣府共生社会政策担当ウェブサイト，（2011年8月10日取得， \url{http://www8.cao.go.jp/youth/youth-harm/law/pdf/kaisetsu.pdf}）．
+\bibitem{naikakufukyo2011a} 内閣府共生社会政策統括官，2011a，「アメリカ・ドイツにおける青少年のインターネット環境整備状況等調査報告書」，内閣府内閣府共生社会政策担当ウェブサイト，（2011年8月10日取得， \url{http://www8.cao.go.jp/youth/youth-harm/chousa/h22/net-us_de/index.html}）．
+\bibitem{naikakufukyo2011b} ――――，2011b，「青少年のインターネット利用環境実態調査」，内閣府内閣府共生社会政策担当ウェブサイト，（2011年8月10日取得， \url{http://www8.cao.go.jp/youth/youth-harm/chousa/h22/net-jittai/pdf-index.html}）．
+\bibitem{ni} 新潟市立総合教育センター，「新潟教科書センター」，新潟市立総合教育センターウェブサイト，（2010年12月1日取得，\url{http://www.netin.niigata.niigata.jp/kyokasho_center/kyokasho_center.html}）．
+\bibitem{niho2006} 日本インターネット協会編，2006，『インターネット白書2006』インプレス．
+\bibitem{niho2007} ――――，2007，『インターネット白書2007』インプレス．
+\bibitem{niho2008} ――――，2008，『インターネット白書2008』インプレス．
+\bibitem{niho2009} ――――，2009，『インターネット白書2009』インプレス．
+\bibitem{kosho} 松浦正浩，2010，『実践！　交渉学――いかに合意形成を図るか』筑摩書房．
+\bibitem{toshokankyokai} 日本図書館協会，2001，「青少年社会環境対策基本法案についての見解」，日本図書館協会ウェブサイト，（2011年8月10日取得，\url{http://www.jla.or.jp/portals/0/html/kenkai/seisyonen.html}）．
+\bibitem{mori} 森亮二，2009，「違法有害情報とその規制の現状」日本インターネット協会編『インターネット白書2009』インプレス．
+\bibitem{gaiyou} 文部科学省初等中等教育局教科書課，2010，「教科書制度の概要」，文部科学省ウェブサイト，（2010年12月1日取得，\url{http://www.mext.go.jp/a_menu/shotou/kyoukasho/gaiyou/04060901.htm}）．
+\bibitem{joho_jittai} 文部科学省初等中等教育局参事官付情報網整備室，2008，「学校における教育の情報化の実態等に関する調査\index{ちようさ@調査}結果（平成19年度）」，文部科学省ウェブサイト，（2010年12月1日取得，\url{http://www.mext.go.jp/a_menu/shotou/zyouhou/08092209.htm}）．
+\bibitem{kaizen} 文部省初等中等教育局長，1990，「教科書採択の在り方の改善について（通知）」，文部科学省ウェブサイト，（2010年12月1日取得，\url{http://www.mext.go.jp/a_menu/shotou/kyoukasho/kaizen.htm}）．
+\bibitem{yokohama} 横浜市教育委員会事務局中央図書館調査\index{ちようさ@調査}資料課，2009，「教科書を探す」，横浜市立図書館ウェブサイト，（2010年12月1日取得， \url{http://www.city.yokohama.jp/me/kyoiku/library/theme/kyoukasyo.html}）．
+\bibitem{yomi} 読売新聞，2011，「ネット接続9社 児童ポルノ強制遮断開始 契約世帯の6割」『読売新聞』2011年4月21日東京夕刊: 11，（2011年5月12日取得，ヨミダス歴史館）．
+%\bibitem{genzai} 歴史学研究会編，2005，『歴史研究の現在と教科書問題――「つくる会」教科書を問う』青木書店．
+\end{thebibliography}
+\newpage
+\appendix
+\chapter{ソースコード}
+\section{ウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}比較\index{ひかく@比較}ツール}
+\subsection{AltFilter}
+次のプログラムの作成には，Microsoft Visual Basic 2010 を使用した。また，動作環境は，Microsoft Windows XP Service Pack 3 以降の OS，Microsoft Internet Explorer 7.0 以降のウェブブラウザ，Microsoft .NET Framework 3.5 Service Pack 1 以降の .NET 実行環境を想定した。
+%\footnote{渡辺浩平先生の選択必修「プログラミング演習 II」（2008 年秋学期）を参考に作成した。}
+
+例示用のウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}は，すべて Microsoft Windows Live ファミリーセーフティを使用した。
+% labelはrefの参照，captionはソースコードの題名を入力する
+\begin{lstlisting}[label=src:altfilter, caption=AltFilter (Form1.vb)]
+Public Class Form1
+
+    Private Sub Button2_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button2.Click
+        ' テキストボックス内の URL のクリア
+        TextBox1.Text = ""
+    End Sub
+
+    Private Sub Button1_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button1.Click
+        Dim urlList As New ArrayList()
+        Dim shw = New SHDocVw.ShellWindows
+        Dim ie As SHDocVw.ShellBrowserWindow = Nothing
+        Dim count As Integer
+        Dim urlVar As String
+
+        ' このツールのほかに起動中の Microsoft Internet Explorer から URL を取得する。
+        For Each ie In shw
+            If TypeName(ie.Document) = "HTMLDocumentClass" Then
+                urlList.Add(ie.LocationURL)
+            End If
+        Next ie
+
+        ' URL を表示する。URL を取得できない場合はエラーメッセージを表示する。
+        count = urlList.Count
+
+        If count = 0 Then
+            ' ステータス表示
+            TextBox2.Text = "URL の取得に失敗しました。"
+        Else
+            ' 一番上のブラウザの URL の抽出
+            urlVar = urlList(0)
+            ' 一番上のブラウザの URL の表示
+            TextBox1.Text = urlList(0)
+            ' ステータス表示
+            TextBox2.Text = "URL の取得に成功しました。"
+        End If
+
+        ' 内蔵の不可視 webbrowser で当該 URL をフィルタに通す。
+        WebBrowser1.Navigate(TextBox1.Text)
+        
+    End Sub
+
+    Private Sub Button4_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button4.Click
+        End
+    End Sub
+
+    Private Sub Button3_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button3.Click
+        ' 管理者にメールを送信する。
+        Dim message As New System.Net.Mail.MailMessage()
+        message.Subject = "From_AltFilter"
+        ' メール本文に結果を挿入する。
+        message.Body = TextBox2.Text
+        ' 管理者のメールアドレスを予め入力しておく。
+        Dim client As New System.Net.Mail.SmtpClient("root@example.net")
+        client.Send(message)
+    End Sub
+
+    Private Sub WebBrowser1_DocumentCompleted(ByVal sender As System.Object, ByVal e As System.Windows.Forms.WebBrowserDocumentCompletedEventArgs) Handles WebBrowser1.DocumentCompleted
+        Dim F1Var As Boolean
+        Dim F2Var As Boolean
+        Dim F3Var As Boolean
+        Dim F1HumanReadable As String
+        Dim F2HumanReadable As String
+        Dim F3HumanReadable As String
+        Dim getUrl As String
+        Dim result As Byte
+        ' 日付を取得
+        Dim dtNow As DateTime = DateTime.Now
+        ' 変数の初期化
+        F1HumanReadable = "アクセスできます。"
+        F2HumanReadable = "アクセスできます。"
+        F3HumanReadable = "アクセスできます。"
+
+        ' 戻り URL にフィルタ固有の文字列が含まれている場合に，遮断されたと判断する。（e.g. http://fss.live.com/krl/block）
+        getUrl = WebBrowser1.Url.ToString
+        result = InStr(getUrl, "http://fss.live.com/krl/block")
+        If result > 0 Then
+            F1Var = True
+            F2Var = True
+            F3Var = True
+        End If
+
+        ' 結果に応じてメッセージを書き換える。
+        If F1Var = True Then
+            F1HumanReadable = "遮断されています。"
+        End If
+        If F2Var = True Then
+            F2HumanReadable = "遮断されています。"
+        End If
+        If F3Var = True Then
+            F3HumanReadable = "遮断されています。"
+        End If
+
+        ' 結果の表示
+        TextBox2.Text = "========================================================================" _
+        + vbCrLf + "下記 URL について複数のコンテンツフィルタに問い合わせました。" + vbCrLf + "フィルタに問題があると考えられる場合は「不満を上申」してください。" _
+        + vbCrLf + vbCrLf + "【フィルタ一覧】" + vbCrLf + "* Microsoft ファミリーセーフティ" + vbCrLf + "* Microsoft ファミリーセーフティ" + vbCrLf + "* Microsoft ファミリーセーフティ" + vbCrLf + vbCrLf + "【URL】" + vbCrLf + TextBox1.Text + vbCrLf + vbCrLf + "【結果】" + vbCrLf + "F1: " + F1HumanReadable + vbCrLf + "F2: " + F2HumanReadable + vbCrLf + "F3: " + F3HumanReadable + vbCrLf + vbCrLf + "【現在時刻】" + vbCrLf + dtNow.ToString() + vbCrLf + "========================================================================"
+    End Sub
+
+End Class
+\end{lstlisting}
+\newpage
+\section{ウェブフィルタリングソフトウェア\index{うえふふいるた@ウェブフィルタリングソフトウェア}評価ツール}
+\subsection{YamakawaNihonshiB-UrlCollector.rb}
+次のプログラムの作成には，Ruby-1.8.7，「近代日本と世界大戦」『日本史 B 用語集』\cite[pp.289-297]{yamakawa-words}第二次世界大戦\index{たいにし@第二次世界大戦}節の全ての単語――168 単語\footnote{重複した ``御前会議〔開戦〕'' と ``御前会議〔終戦〕'' は，``御前会議'' に統合した。}\footnote{``近衛内閣（第三次）'' を ``第三次近衛内閣'' とした。}を使用した。
+\begin{lstlisting}[label=src:YNBW, caption=YamakawaNihonshiB-UrlCollector.rb]
+# -*- coding: utf-8 -*-
+# 攻撃コードを含むウェブサイトにアクセスする可能性があります。
+
+require 'rubygems'
+require 'mechanize'
+
+agent = Mechanize::new
+agent.user_agent_alias = 'Windows IE 7'
+
+# 検索する用語を配列 words として準備
+words = ["北部仏印進駐",
+ "援蒋ルート",
+ "日独伊三国同盟",
+ "ABCDライン",
+ "日米交渉",
+ "野村吉三郎",
+ "来栖三郎",
+ "ハル",
+ "ハル＝ノート",
+ "グルー",
+ "豊田貞次郎",
+ "日ソ中立条約",
+ "独ソ戦争",
+ "イギリス・ソ連相互援助協定",
+ "大西洋憲章",
+ "関東軍特種演習",
+ "第三次近衛内閣",
+ "南進政策",
+ "南部仏印進駐",
+ "帝国国策遂行要領",
+ "御前会議",
+ "東条英機",
+ "東条内閣",
+ "太平洋戦争",
+ "真珠湾攻撃",
+ "マレー半島上陸",
+ "シンガポール華僑虐殺事件",
+ "翼賛選挙",
+ "翼賛政治会",
+ "大日本政治会",
+ "食糧管理法",
+ "軍需省",
+ "軍政",
+ "軍票",
+ "大東亜共栄圏",
+ "大東亜会議",
+ "自由インド仮政府",
+ "バターン死の行進",
+ "泰緬鉄道",
+ "731部隊",
+ "毒ガス",
+ "満州帝国協和会",
+ "皇民化政策",
+ "南次郎",
+ "皇国臣民の誓詞",
+ "創氏改名",
+ "朝鮮人の強制連行",
+ "従軍慰安婦問題",
+ "中国人の強制連行",
+ "三光作戦",
+ "抗日運動",
+ "反戦同盟",
+ "国民勤労動員令",
+ "国民勤労報国協力令",
+ "勤労動員",
+ "学徒勤労動員",
+ "女子挺身隊",
+ "学徒出陣",
+ "国民義勇隊",
+ "陸軍志願兵制度",
+ "皇民奉仕会",
+ "高砂族",
+ "ミッドウェー海戦",
+ "アッツ島戦",
+ "ガダルカナル島戦",
+ "インパール戦",
+ "マリアナ沖海戦",
+ "サイパン諸島",
+ "レイテ島海戦",
+ "特別攻撃隊",
+ "硫黄島の戦い",
+ "沖縄戦",
+ "鉄血勤皇隊",
+ "ひめゆり隊",
+ "太田実",
+ "牛島満",
+ "対馬丸",
+ "戦艦大和",
+ "本土空襲",
+ "東京大空襲",
+ "学童疎開",
+ "本土決戦",
+ "小磯國昭",
+ "小磯内閣",
+ "最高戦争指導会議",
+ "近衛上奏文",
+ "終戦工作",
+ "カイロ宣言",
+ "ローズヴェルト",
+ "チャーチル",
+ "テヘラン会議",
+ "イタリアの降伏",
+ "ヤルタ協定",
+ "スターリン",
+ "鈴木貫太郎",
+ "鈴木貫太郎内閣",
+ "ドイツ降伏",
+ "ポツダム宣言",
+ "原子爆弾",
+ "ソ連の対日参戦",
+ "シベリア抑留",
+ "無条件降伏",
+ "終戦の詔勅",
+ "降伏文書調印",
+ "重光葵",
+ "日本分割占領計画",
+ "大東亜戦争全史",
+ "戸坂潤",
+ "傾向映画",
+ "五所平之助",
+ "清沢洌",
+ "正木ひろし",
+ "桐生悠々",
+ "吉田富三",
+ "桜田一郎",
+ "釈迢空",
+ "金子光晴",
+ "宮柊二",
+ "亀井勝一郎",
+ "保田与重郎",
+ "皇国史観",
+ "日本文学報国会",
+ "大日本言論報国会",
+ "高見順",
+ "阿部知二",
+ "武田麟太郎",
+ "小林秀雄",
+ "伊藤整",
+ "丹羽文雄",
+ "堀辰雄",
+ "火野葦平",
+ "石川達三",
+ "軽演劇",
+ "エロ・グロ・ナンセンス",
+ "榎本健一",
+ "カジノ＝フォーリー",
+ "古川緑波",
+ "プロレタリア演劇",
+ "前進座",
+ "島田正吾",
+ "辰巳柳太郎",
+ "宇野重吉",
+ "杉村春子",
+ "山本安英",
+ "西条八十",
+ "古賀政男",
+ "軍歌",
+ "日本美術報国会",
+ "靉光",
+ "松本竣介",
+ "新人画会",
+ "大東亜戦争美術展",
+ "宗教団体法",
+ "灯台社",
+ "大本教",
+ "ひとのみち教団",
+ "創価教育学会",
+ "横浜事件",
+ "人口政策要項",
+ "金属類回収令",
+ "千人針",
+ "国民服",
+ "木炭自動車",
+ "ルース・ベネディクト",
+ "強制収容所",
+ "満鉄特急あじあ号",
+ "水豊発電所",
+ "銃後"]
+
+# 配列 words の最後まで一行ずつ取り出す繰り返し処理
+words.each{|k|
+
+  # Google へ移動
+  agent.get('http://www.google.co.jp/')
+
+  # Google で単語を検索
+  agent.page.form_with(:name => 'f'){|form|
+    form.field_with(:name => 'q').value = k
+    form.click_button
+  }
+
+  # 検索結果 1 ページ分の URL をまとめて取得
+  url = agent.page.root.search('a.l').map{|j|
+    j['href']
+  }
+
+  # すべての URL にアクセスする。
+  # アクセスできない場合は，例外としてエラーメッセージを表示する。
+  url.each{|i|
+    begin
+      agent.get(url)
+    rescue TimeoutError
+      puts "__Timeout Error__"
+    rescue Mechanize::ResponseCodeError => exception
+      case exception.response_code
+      when '403' then
+        puts "__403 Forbidden__"
+      when '404' then
+        puts "__404 Not Found__"
+      when '503' then
+        puts "__503 Service Unavailable__"
+      else
+        puts "__Unknown Exception__"
+      end
+    end
+
+  # アクセス先の URL を表示
+  puts agent.page.uri
+
+  # 10 秒のウェイト
+  sleep 10
+  }
+}
+\end{lstlisting}
+\subsection{ieLauncher.rb}
+次のプログラムの作成には，Ruby-1.9.2 (mswin32)，Microsoft Internet Explorer 8.0 を使用した。
+\begin{lstlisting}[label=src:ieLauncher.rb, caption=ieLauncher.rb]
+# -*- coding: utf-8 -*-
+# 攻撃コードを含むウェブサイトにアクセスする可能性があります。
+
+# 動作確認用の変数の初期化
+i = 0
+
+# 接続する URL を事前に用意する。
+url = ['http://www.example.com/',
+'http://www.example.net/', 
+'http://www.example.org/']
+
+# URL 分繰り返し処理する。
+url.each{|row|
+  # 動作確認用の番号表示
+  i = i + 1
+  puts i
+
+  # each 文のカウンタ変数を一時変数にコピーする。
+  row_temp = row
+
+  # ブラウザに URL を与えて起動する。
+  pid_ie = Process.spawn('"C:\Program Files\Internet Explorer\iexplore.exe"' + ' "' + row_temp + '"')
+
+  # ブラウザの処理の完了を待つ。
+  sleep 10
+
+  # 起動中のブラウザの URL を記録するプログラムを起動する。
+  pid_url = Process.spawn('LastUrlRecorder.exe')
+
+  # 起動中のブラウザの title 要素内の文字列を取得するプログラムを起動する。
+  # pid_title = Process.spawn('LastTitleRecorder.exe')
+
+  # URL と title の記録の完了を待つ。
+  sleep 10
+
+  # ブラウザを終了する。
+  pid_taskkill = Process.spawn('taskkill /IM iexplore.exe /T')
+
+  # ブラウザの終了を待つ。
+  sleep 5
+
+  # プロセスを回収してリソースを解放する。
+  Process.wait(pid_ie)
+  Process.wait(pid_url)
+  # Process.wait(pid_title)
+  Process.wait(pid_taskkill)
+
+  # 動作確認用のステータス表示
+  puts "done"
+}
+\end{lstlisting}
+\subsection{LastUrlRecorder}
+次のプログラムの作成には，Microsoft Visual Basic 2010 を使用した。Reference には \mbox{Microsoft} Internet Controls と，Microsoft HTML Object Library を追加した。
+\begin{lstlisting}[label=src:LastUrlRecorder, caption=LastUrlRecorder (Module1.vb)]
+Imports System.IO
+
+Module Module1
+
+    Sub Main()
+
+        Dim urlList As New ArrayList()
+        Dim shw = New SHDocVw.ShellWindows
+        Dim ie As SHDocVw.ShellBrowserWindow = Nothing
+
+        ' 起動中の Microsoft Internet Explorer から URL を取得する。
+        For Each ie In shw
+            If TypeName(ie.Document) = "HTMLDocumentClass" Then
+                urlList.Add(ie.LocationURL)
+            End If
+        Next ie
+
+        ' 取得した URL をファイルに書き込む。
+        System.IO.File.AppendAllText("lasturl.txt", urlList(0).ToString.TrimEnd(" ", "*", "#") + vbCrLf)
+
+    End Sub
+
+End Module
+\end{lstlisting}
+\subsection{LastTitleRecorder}
+次のプログラムの作成には，Microsoft Visual Basic 2010 を使用した。Reference には \mbox{Microsoft} Internet Controls と，Microsoft HTML Object Library を追加した。
+\begin{lstlisting}[label=src:LastTitleRecorder, caption=LastTitleRecorder (Module1.vb)]
+Imports System.IO
+
+Module Module1
+
+    Sub Main()
+
+        Dim urlTitle As New ArrayList()
+        Dim shw = New SHDocVw.ShellWindows
+        Dim ie As SHDocVw.ShellBrowserWindow = Nothing
+
+        ' 起動中の Microsoft Internet Explorer のタイトルバーの文字列を取得する。
+        For Each ie In shw
+            If TypeName(ie.Document) = "HTMLDocumentClass" Then
+                urlTitle.Add(ie.LocationName)
+            End If
+        Next ie
+
+        ' 取得した文字列をファイルに書き込む。
+        System.IO.File.AppendAllText("lasttitle.txt", urlTitle(0) + vbCrLf)
+
+    End Sub
+
+End Module
+\end{lstlisting}
+\backmatter
+\newpage
+\printindex
+\end{document}
