@@ -21,6 +21,6 @@ url = agent.page.root.search(’a.l’).map{|j|j[’href’]}
 pid ie = Process.spawn(’”C:\Program Files\Internet Explorer\iexplore.exe”’ + ’ ”’ + row temp + ’”’)
 pid url = Process.spawn(’LastUrlRecorder.exe’)
 ```
-詳しくは卒論の本文 ```thesis.tex``` を参照してください。
+詳しくは卒論の本文である ```thesis.tex``` を参照してください。
 
 
