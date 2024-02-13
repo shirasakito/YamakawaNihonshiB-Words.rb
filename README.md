@@ -21,8 +21,6 @@ url = agent.page.root.search(’a.l’).map{|j|j[’href’]}
 pid ie = Process.spawn(’”C:\Program Files\Internet Explorer\iexplore.exe”’ + ’ ”’ + row temp + ’”’)
 pid url = Process.spawn(’LastUrlRecorder.exe’)
 ```
-生徒側の GUI および文献は次の URI の卒論の本文を参照してください。
-
-[https://shirasakito.github.io](https://shirasakito.github.io)
+詳しくは卒論の本文 ```thesis.tex``` を参照してください。
 
 
