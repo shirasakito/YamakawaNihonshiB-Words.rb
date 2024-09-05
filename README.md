@@ -1,6 +1,9 @@
 # YamakawaNihonshiB-Words.rb
 ウェブフィルタの傾向評価用スクリプトです。
 
+## English translation 
+https://docs.google.com/document/d/1Xoy2sQM66y1-8d0a86DIDpWHxMtv5camqgo_8Y0-TnA/edit?usp=drivesdk
+
 ## TODO
 - テキストマイニングの書籍の読み込み。2024/01/31
 - 卒論を置きたい。2024/02/02
