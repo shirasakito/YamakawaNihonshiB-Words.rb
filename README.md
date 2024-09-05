@@ -2,7 +2,7 @@
 ウェブフィルタの傾向評価用スクリプトです。
 
 ## [Draft] My graduation thesis's English translation 
-[A prototyping of the poll-based browser filter for education about named that the “Alt Filter”](https://docs.google.com/document/d/1Xoy2sQM66y1-8d0a86DIDpWHxMtv5camqgo_8Y0-TnA/edit?usp=drivesdk)
+[A prototyping of the poll-based browser filter for education about named that the “Alt Filter” (2012)](https://docs.google.com/document/d/1Xoy2sQM66y1-8d0a86DIDpWHxMtv5camqgo_8Y0-TnA/edit?usp=drivesdk)
 
 ## TODO
 - テキストマイニングの書籍の読み込み。2024/01/31
