@@ -1,7 +1,7 @@
 # YamakawaNihonshiB-Words.rb
 ウェブフィルタの傾向評価用スクリプトです。
 
-## English translation 
+## [Draft] Thesis English translation 
 https://docs.google.com/document/d/1Xoy2sQM66y1-8d0a86DIDpWHxMtv5camqgo_8Y0-TnA/edit?usp=drivesdk
 
 ## TODO
